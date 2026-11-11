@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   if (code) {
     const { error } = await supabaseServer().auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(new URL("/", url.origin));
+    console.error("sign-in link exchange failed", error.message);
   }
   return NextResponse.redirect(new URL("/login?error=link", url.origin));
 }
