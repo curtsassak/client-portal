@@ -96,8 +96,26 @@ export async function POST(req: Request) {
         })
         .catch(async (err) => {
           console.error("positioning stream error", err);
-          await finish("\n\n_(Reply interrupted.)_").catch(() => {});
-          if (!closed) { closed = true; controller.error(err); }
+          if (full) {
+            await finish("\n\n_(Reply interrupted.)_").catch(() => {});
+            if (!closed) { closed = true; controller.error(err); }
+            return;
+          }
+          // Nothing streamed: tell the browser why, so the client and Curt see a real reason.
+          const status = (err as { status?: number })?.status;
+          const raw = String((err as Error)?.message || err);
+          const reason =
+            status === 401 || /api key|x-api-key|authentication/i.test(raw) ? "AUTH"
+            : /credit|billing|balance/i.test(raw) ? "BILLING"
+            : status === 429 ? "RATE"
+            : /ByteString/i.test(raw) ? "KEYCHARS"
+            : status === 404 || /model/i.test(raw) ? "MODEL"
+            : "OTHER";
+          if (!closed) {
+            controller.enqueue(encoder.encode(`\u0000ERROR:${reason}:${raw.slice(0, 300)}`));
+            closed = true;
+            controller.close();
+          }
         });
     },
     cancel() {

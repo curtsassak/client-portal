@@ -145,6 +145,19 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
         full += dec.decode(value, { stream: true });
         setLive(full);
       }
+      if (full.startsWith("\u0000ERROR:")) {
+        const [, reason, ...rest] = full.split(":");
+        const MSG: Record<string, string> = {
+          AUTH: "The AI service rejected the portal's key. Curt needs to check ANTHROPIC_API_KEY.",
+          BILLING: "The AI account is out of credit. Curt needs to add billing at console.anthropic.com.",
+          RATE: "Too many requests right now. Wait a minute and try again.",
+          KEYCHARS: "The AI key has extra characters pasted into it. Curt needs to re-paste ANTHROPIC_API_KEY.",
+          MODEL: "The AI model setting isn't valid.",
+        };
+        setLive("");
+        setError(`${MSG[reason] || "The AI service returned an error."} (${rest.join(":").slice(0, 160)})`);
+        return;
+      }
       const blocks = extractBlocks(full);
       if (blocks.profile) { setProfile(blocks.profile); setPtab("profile"); }
       if (blocks.linkedin) { setLinkedin(blocks.linkedin); setPtab("linkedin"); }
