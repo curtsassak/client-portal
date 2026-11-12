@@ -299,6 +299,15 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
                 </div>
               )
             )}
+            {!busy && !error && lastIsUser && (
+              <div className="msg bot">
+                <div className="who">Positioning strategist</div>
+                <div className="err">
+                  <span className="muted">No reply to your last message yet.</span>
+                  <button type="button" className="btn" onClick={() => run({ retry: true })}>Get reply</button>
+                </div>
+              </div>
+            )}
             {(busy || error) && (
               <div className="msg bot">
                 <div className="who">Positioning strategist</div>
