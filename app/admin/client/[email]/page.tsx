@@ -43,6 +43,10 @@ export default async function ClientDetail({ params }: { params: { email: string
                     : "Approving marks this as their Master Positioning Profile and opens LinkedIn optimization."}
                 </p>
               </div>
+              <div className="review-acts">
+                {rec.profile && <a className="btn" href={`/api/positioning/export?doc=profile&email=${encodeURIComponent(email)}`}>Download profile (Word)</a>}
+                {rec.linkedin && <a className="btn" href={`/api/positioning/export?doc=linkedin&email=${encodeURIComponent(email)}`}>Download LinkedIn (Word)</a>}
+              </div>
               <form action={setStatus} className="review-acts">
                 <input type="hidden" name="email" value={email} />
                 {rec.status !== "approved" ? (

@@ -222,11 +222,8 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
   const doc = ptab === "profile" ? profile : linkedin;
 
   function download() {
-    const filename = ptab === "profile" ? `${profileTitle.replace(/ /g, "-")}.md` : "LinkedIn-Profile-Draft.md";
-    const url = URL.createObjectURL(new Blob([doc], { type: "text/markdown" }));
-    const a = document.createElement("a");
-    a.href = url; a.download = filename; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    // Word file: opens in Word, Pages, or Google Docs (upload to Drive, then Open with Google Docs).
+    window.location.href = `/api/positioning/export?doc=${ptab}`;
   }
   async function copy() {
     try { await navigator.clipboard.writeText(doc); setCopied(true); setTimeout(() => setCopied(false), 1500); }
@@ -404,7 +401,7 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
           <div className="pfoot">
             {doc && (
               <div className="acts">
-                <button type="button" className="btn" onClick={download}>Download</button>
+                <button type="button" className="btn" onClick={download}>Download (Word)</button>
                 <button type="button" className="btn" onClick={copy}>{copied ? "Copied" : "Copy"}</button>
               </div>
             )}
