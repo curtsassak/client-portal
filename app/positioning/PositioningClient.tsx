@@ -73,7 +73,7 @@ const SECTIONS = [
 
 const STARTERS = [
   { title: "Start my positioning", sub: "Begin with your target role and employers", msg: "Let's start. Walk me through Phase 1." },
-  { title: "Upload my résumé", sub: "PDF, Word or text", msg: "__attach" },
+  { title: "Upload a document", sub: "Résumé, accomplishments, or your exercise sheets", msg: "__attach" },
   { title: "Build my evidence inventory", sub: "Pull wins and proof out of your career", msg: "I don't have a Career Evidence Inventory yet. Help me build one." },
   { title: "Research target employers", sub: "Find the problems they're hiring to solve", msg: "Help me figure out what my target employers need most and how to research it." },
 ];
@@ -272,7 +272,7 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
               <div className="welcome">
                 <h2>Make the case for why they hire you.</h2>
                 <p>We&apos;ll pin down what your target employers need solved, find the proof in your career, and build a positioning profile you&apos;ll review with {STRATEGIST}. Once {STRATEGIST} approves it, this tool rebuilds your LinkedIn on that foundation.</p>
-                <p>Have your résumé ready. Two or three job descriptions you&apos;d apply for will sharpen everything.</p>
+                <p>Have these ready to upload: your résumé, your accomplishments document, and your completed Clean Out the Garage and Peak &amp; Crap sheets. Two or three job descriptions you&apos;d apply for will sharpen everything.</p>
                 <div className="starters">
                   {STARTERS.map((s) => (
                     <button key={s.title} type="button" onClick={() => (s.msg === "__attach" ? fileRef.current?.click() : send(s.msg))}>
@@ -351,7 +351,7 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
               />
               <div className="row">
                 <div className="left">
-                  <button type="button" className="btn" disabled={busy} onClick={() => fileRef.current?.click()}>Attach résumé</button>
+                  <button type="button" className="btn" disabled={busy} onClick={() => fileRef.current?.click()}>Attach file</button>
                   <input
                     ref={fileRef}
                     type="file"
