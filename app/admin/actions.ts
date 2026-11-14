@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { siteOrigin } from "@/lib/origin";
 
 export type AddState = { ok: boolean; message: string };
 
@@ -62,4 +63,26 @@ export async function setStatus(form: FormData) {
   }
   revalidatePath("/admin");
   revalidatePath(`/admin/client/${encodeURIComponent(email)}`);
+}
+
+export type LinkState = { ok: boolean; link?: string; message?: string };
+
+// Makes a one-time sign-in link Curt can send himself (text, email, LinkedIn),
+// so a client can get in even when the automatic email doesn't arrive.
+export async function createSignInLink(email: string): Promise<LinkState> {
+  await requireAdmin();
+  email = email.trim().toLowerCase();
+  const db = supabaseAdmin();
+  const { data: client } = await db.from("clients").select("email").eq("email", email).maybeSingle();
+  if (!client) return { ok: false, message: "That email isn't on your client list." };
+
+  // Make sure the account exists (first-time clients don't have one yet).
+  const created = await db.auth.admin.createUser({ email, email_confirm: true });
+  if (created.error && !/already|registered|exists/i.test(created.error.message)) {
+    return { ok: false, message: `Couldn't prepare the account. (${created.error.message})` };
+  }
+  const { data, error } = await db.auth.admin.generateLink({ type: "magiclink", email });
+  const hash = data?.properties?.hashed_token;
+  if (error || !hash) return { ok: false, message: `Couldn't create a link. (${error?.message || "no token"})` };
+  return { ok: true, link: `${siteOrigin()}/auth/confirm?token_hash=${hash}&type=magiclink` };
 }

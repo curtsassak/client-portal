@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import AddClient from "./AddClient";
 import { removeClient } from "./actions";
+import SignInLink from "./SignInLink";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,7 @@ export default async function Admin() {
                       <td><span className={`pill ${LABEL[r.key].cls}`}>{LABEL[r.key].text}</span></td>
                       <td className="muted small">{r.updated ? new Date(r.updated).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "America/Chicago" }) : "—"}</td>
                       <td>
+                        <SignInLink email={r.email} />
                         <form action={removeClient}>
                           <input type="hidden" name="email" value={r.email} />
                           <button className="btn link" type="submit" title="Removes sign-in access. Their work is kept.">Remove access</button>
