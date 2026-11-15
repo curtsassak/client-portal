@@ -23,3 +23,6 @@ create table if not exists public.positioning (
 -- the app's server code reads and writes with the service role key after checking who is signed in.
 alter table public.clients enable row level security;
 alter table public.positioning enable row level security;
+
+-- Added Nov 2026: Phase 0 Direction Plan for clients finding their next move.
+alter table public.positioning add column if not exists direction text not null default '';

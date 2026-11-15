@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { currentUser } from "@/lib/auth";
-import { extractBlocks, getPositioning, savePositioning, type Turn } from "@/lib/positioning";
+import { extractBlocks, getPositioning, saveDirection, savePositioning, type Turn } from "@/lib/positioning";
 import { POSITIONING_RULES } from "@/lib/prompts/positioning";
 
 export const runtime = "nodejs";
@@ -9,7 +9,7 @@ export const maxDuration = 300;
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5";
 const HISTORY_CHAR_BUDGET = 300_000;
 
-function systemPrompt(status: string, profile: string, linkedin: string) {
+function systemPrompt(status: string, profile: string, linkedin: string, direction: string) {
   let s = POSITIONING_RULES + "\n\nPHASE STATE: ";
   s +=
     status === "approved"
@@ -18,6 +18,7 @@ function systemPrompt(status: string, profile: string, linkedin: string) {
         ? "Phase 1, submitted for strategist review. Approval has NOT happened yet. You may refine the draft if the client asks, but do not start LinkedIn work."
         : "Phase 1. Strategist approval has NOT happened. Do not start LinkedIn work.";
   if (profile) s += "\n\nLATEST SAVED POSITIONING PROFILE:\n" + profile;
+  if (direction) s += "\n\nLATEST SAVED DIRECTION PLAN (Phase 0):\n" + direction;
   if (linkedin) s += "\n\nLATEST SAVED LINKEDIN DRAFT:\n" + linkedin;
   return s;
 }
@@ -65,7 +66,7 @@ export async function POST(req: Request) {
   const stream = client.messages.stream({
     model: MODEL,
     max_tokens: 8000,
-    system: systemPrompt(rec.status, rec.profile, rec.linkedin),
+    system: systemPrompt(rec.status, rec.profile, rec.linkedin, rec.direction || ""),
     messages: toMessages(turns),
   });
 
@@ -80,6 +81,7 @@ export async function POST(req: Request) {
     if (blocks.profile) patch.profile = blocks.profile;
     if (blocks.linkedin) patch.linkedin = blocks.linkedin;
     await savePositioning(user.id, patch);
+    if (blocks.direction) await saveDirection(user.id, blocks.direction);
   };
 
   const readable = new ReadableStream({

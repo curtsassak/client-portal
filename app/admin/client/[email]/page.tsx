@@ -58,6 +58,15 @@ export default async function ClientDetail({ params }: { params: { email: string
               </form>
             </section>
 
+            {rec.direction && (
+              <section className="panel doc">
+                <div className="review-acts" style={{ marginBottom: 8 }}>
+                  <a className="btn" href={`/api/positioning/export?doc=direction&email=${encodeURIComponent(email)}`}>Download Direction Plan (Word)</a>
+                </div>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{rec.direction}</ReactMarkdown>
+              </section>
+            )}
+
             <div className="detail-grid">
               <section className="panel doc">
                 {rec.profile ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{rec.profile}</ReactMarkdown> : <p className="muted">No profile yet.</p>}
@@ -72,7 +81,7 @@ export default async function ClientDetail({ params }: { params: { email: string
               <div className="transcript">
                 {turns.map((t, i) => (
                   <div key={i} className={`msg ${t.role === "user" ? "user" : "bot"}`}>
-                    {t.role === "user" ? (t.display ?? t.content) : <div className="body"><ReactMarkdown remarkPlugins={[remarkGfm]}>{t.content.replace(/<<<(PROFILE|LINKEDIN)[\s\S]*?(PROFILE|LINKEDIN)>>>/g, "_[Document saved to panel]_")}</ReactMarkdown></div>}
+                    {t.role === "user" ? (t.display ?? t.content) : <div className="body"><ReactMarkdown remarkPlugins={[remarkGfm]}>{t.content.replace(/<<<(PROFILE|LINKEDIN|DIRECTION)[\s\S]*?(PROFILE|LINKEDIN|DIRECTION)>>>/g, "_[Document saved to panel]_")}</ReactMarkdown></div>}
                     {t.attach && <div className="chip">Attached: {t.attach}</div>}
                   </div>
                 ))}

@@ -7,17 +7,19 @@ import remarkGfm from "remark-gfm";
 
 type Turn = { role: "user" | "assistant"; content: string; display?: string; attach?: string };
 type Status = "draft" | "submitted" | "approved";
-type Initial = { turns: Turn[]; profile: string; linkedin: string; status: Status };
+type Initial = { turns: Turn[]; profile: string; linkedin: string; direction: string; status: Status };
+type Tab = "direction" | "profile" | "linkedin";
 
 const STRATEGIST = "Curt";
 
 const BLOCKS = [
   { key: "profile", open: "<<<PROFILE", close: "PROFILE>>>" },
   { key: "linkedin", open: "<<<LINKEDIN", close: "LINKEDIN>>>" },
+  { key: "direction", open: "<<<DIRECTION", close: "DIRECTION>>>" },
 ] as const;
 
 function extractBlocks(text: string) {
-  const out: { profile?: string; linkedin?: string } = {};
+  const out: { profile?: string; linkedin?: string; direction?: string } = {};
   for (const b of BLOCKS) {
     const i = text.lastIndexOf(b.open);
     if (i < 0) continue;
@@ -28,7 +30,7 @@ function extractBlocks(text: string) {
   return out;
 }
 
-type Seg = { type: "md"; text: string } | { type: "card"; key: "profile" | "linkedin"; writing: boolean };
+type Seg = { type: "md"; text: string } | { type: "card"; key: Tab; writing: boolean };
 
 function segments(text: string): Seg[] {
   const segs: Seg[] = [];
@@ -83,6 +85,7 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
   const [turns, setTurns] = useState<Turn[]>(initial.turns);
   const [profile, setProfile] = useState(initial.profile);
   const [linkedin, setLinkedin] = useState(initial.linkedin);
+  const [direction, setDirection] = useState(initial.direction);
   const [status, setStatus] = useState<Status>(initial.status);
   const [busy, setBusy] = useState(false);
   const [live, setLive] = useState("");
@@ -90,7 +93,7 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
   const [notice, setNotice] = useState("");
   const [input, setInput] = useState("");
   const [attach, setAttach] = useState<{ name: string; text: string } | null>(null);
-  const [ptab, setPtab] = useState<"profile" | "linkedin">("profile");
+  const [ptab, setPtab] = useState<Tab>(initial.direction && !initial.profile ? "direction" : "profile");
   const [view, setView] = useState<"chat" | "profile">("chat");
   const [confirmReset, setConfirmReset] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -161,6 +164,7 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
       const blocks = extractBlocks(full);
       if (blocks.profile) { setProfile(blocks.profile); setPtab("profile"); }
       if (blocks.linkedin) { setLinkedin(blocks.linkedin); setPtab("linkedin"); }
+      if (blocks.direction) { setDirection(blocks.direction); setPtab("direction"); }
       setTurns((t) => [...t, { role: "assistant", content: full }]);
       setLive("");
     } catch (e) {
@@ -215,11 +219,11 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
     if (!res.ok) { setNotice(j.error || "Something went wrong. Try again."); return; }
     if (action === "submit") setStatus("submitted");
     if (action === "reset") {
-      setTurns([]); setProfile(""); setLinkedin(""); setStatus("draft"); setConfirmReset(false); setPtab("profile");
+      setTurns([]); setProfile(""); setLinkedin(""); setDirection(""); setStatus("draft"); setConfirmReset(false); setPtab("profile");
     }
   }
 
-  const doc = ptab === "profile" ? profile : linkedin;
+  const doc = ptab === "profile" ? profile : ptab === "direction" ? direction : linkedin;
 
   function download() {
     // Word file: opens in Word, Pages, or Google Docs (upload to Drive, then Open with Google Docs).
@@ -239,7 +243,7 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
       ) : (
         <div className="card" key={i}>
           <div>
-            <strong>{s.key === "profile" ? profileTitle : "LinkedIn profile"}</strong>
+            <strong>{s.key === "profile" ? profileTitle : s.key === "direction" ? "Direction Plan" : "LinkedIn profile"}</strong>
             <br />
             <span>{s.writing ? "Writing it now…" : "Updated in your profile panel"}</span>
           </div>
@@ -378,6 +382,7 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
 
         <aside className="profile" aria-label="Your positioning">
           <div className="ptabs" role="tablist">
+            {direction && <button role="tab" aria-selected={ptab === "direction"} onClick={() => setPtab("direction")}>Direction</button>}
             <button role="tab" aria-selected={ptab === "profile"} onClick={() => setPtab("profile")}>Positioning profile</button>
             <button role="tab" aria-selected={ptab === "linkedin"} onClick={() => setPtab("linkedin")}>LinkedIn</button>
           </div>

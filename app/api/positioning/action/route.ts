@@ -1,5 +1,5 @@
 import { currentUser } from "@/lib/auth";
-import { getPositioning, savePositioning } from "@/lib/positioning";
+import { getPositioning, saveDirection, savePositioning } from "@/lib/positioning";
 
 export async function POST(req: Request) {
   const user = await currentUser();
@@ -16,6 +16,7 @@ export async function POST(req: Request) {
   if (action === "reset") {
     if (rec.status === "approved") return Response.json({ error: "Your positioning is approved. Ask Curt before starting over." }, { status: 400 });
     await savePositioning(user.id, { turns: [], profile: "", linkedin: "", status: "draft" });
+    await saveDirection(user.id, "");
     return Response.json({ status: "draft" });
   }
   return Response.json({ error: "Unknown action" }, { status: 400 });

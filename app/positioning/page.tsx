@@ -16,6 +16,7 @@ export default async function PositioningPage() {
           turns: (rec.turns || []).map((t) => ({ role: t.role, content: t.content, display: t.display, attach: t.attach })),
           profile: rec.profile,
           linkedin: rec.linkedin,
+          direction: rec.direction || "",
           status: rec.status,
         }}
       />

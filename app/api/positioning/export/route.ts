@@ -10,17 +10,18 @@ export async function GET(req: Request) {
   const user = await currentUser();
   if (!user) return new Response("Not signed in", { status: 401 });
   const url = new URL(req.url);
-  const which = url.searchParams.get("doc") === "linkedin" ? "linkedin" : "profile";
+  const docParam = url.searchParams.get("doc");
+  const which = docParam === "linkedin" ? "linkedin" : docParam === "direction" ? "direction" : "profile";
   const forEmail = url.searchParams.get("email");
 
-  let rec: { profile: string; linkedin: string; status: string } | null = null;
+  let rec: { profile: string; linkedin: string; status: string; direction?: string } | null = null;
   if (forEmail && isAdminEmail(user.email)) {
-    const { data } = await supabaseAdmin().from("positioning").select("profile,linkedin,status").eq("email", forEmail.toLowerCase()).maybeSingle();
+    const { data } = await supabaseAdmin().from("positioning").select("*").eq("email", forEmail.toLowerCase()).maybeSingle();
     rec = data;
   } else {
     rec = await getPositioning(user.id, user.email!);
   }
-  const md = rec ? (which === "linkedin" ? rec.linkedin : rec.profile) : "";
+  const md = rec ? (which === "linkedin" ? rec.linkedin : which === "direction" ? rec.direction || "" : rec.profile) : "";
   if (!md) return new Response("Nothing to download yet", { status: 404 });
 
   // Strip whitespace between tags so Word doesn't render stray blank lines.
@@ -40,7 +41,7 @@ export async function GET(req: Request) {
   })) as Buffer;
 
   const title =
-    which === "linkedin" ? "LinkedIn Profile Draft" : rec!.status === "approved" ? "Master Positioning Profile" : "Draft Positioning Profile";
+    which === "linkedin" ? "LinkedIn Profile Draft" : which === "direction" ? "Direction Plan" : rec!.status === "approved" ? "Master Positioning Profile" : "Draft Positioning Profile";
   return new Response(new Uint8Array(buf), {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

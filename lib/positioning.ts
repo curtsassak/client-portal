@@ -7,6 +7,7 @@ export type PositioningRecord = {
   email: string;
   turns: Turn[];
   profile: string;
+  direction?: string;
   linkedin: string;
   status: Status;
   approved_at: string | null;
@@ -33,10 +34,11 @@ export async function savePositioning(userId: string, patch: Partial<Positioning
 const BLOCKS = [
   { key: "profile", open: "<<<PROFILE", close: "PROFILE>>>" },
   { key: "linkedin", open: "<<<LINKEDIN", close: "LINKEDIN>>>" },
+  { key: "direction", open: "<<<DIRECTION", close: "DIRECTION>>>" },
 ] as const;
 
-export function extractBlocks(text: string): { profile?: string; linkedin?: string } {
-  const out: { profile?: string; linkedin?: string } = {};
+export function extractBlocks(text: string): { profile?: string; linkedin?: string; direction?: string } {
+  const out: { profile?: string; linkedin?: string; direction?: string } = {};
   for (const b of BLOCKS) {
     const i = text.lastIndexOf(b.open);
     if (i < 0) continue;
@@ -45,4 +47,14 @@ export function extractBlocks(text: string): { profile?: string; linkedin?: stri
     out[b.key] = text.slice(i + b.open.length, j).trim();
   }
   return out;
+}
+
+// The direction column was added after launch; save it separately so a missing column never breaks a chat.
+export async function saveDirection(userId: string, direction: string) {
+  try {
+    const { error } = await supabaseAdmin().from("positioning").update({ direction }).eq("user_id", userId);
+    if (error) console.error("saveDirection failed (run the direction column SQL?)", error.message);
+  } catch (e) {
+    console.error("saveDirection failed", e);
+  }
 }
