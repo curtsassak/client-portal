@@ -182,3 +182,6 @@ aside.profile { min-height: 0; min-width: 0; display: flex; flex-direction: colu
 
 .signin-link { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; max-width: 280px; }
 .signin-link .field { font-size: 12px; padding: 6px 8px; }
+.fork-q { font-family: var(--display); font-size: 18px; margin: 6px 0 0; text-wrap: balance; }
+.starters button.fork { border-color: var(--gold); padding: 16px; }
+.starters button.fork b { font-size: 17px; }

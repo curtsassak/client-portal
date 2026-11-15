@@ -74,10 +74,16 @@ const SECTIONS = [
 ];
 
 const STARTERS = [
-  { title: "Start my positioning", sub: "Begin with your target role and employers", msg: "Let's start. Walk me through Phase 1." },
-  { title: "Upload a document", sub: "Résumé, accomplishments, or exercise sheets", msg: "__attach" },
-  { title: "Build my evidence inventory", sub: "Pull wins and proof out of your career", msg: "I don't have a Career Evidence Inventory yet. Help me build one." },
-  { title: "Research target employers", sub: "Find the problems they're hiring to solve", msg: "Help me figure out what my target employers need most and how to research it." },
+  {
+    title: "I know what I want next",
+    sub: "I have a target role and industry, even a rough one",
+    msg: "I know what I want next. Let's start positioning.",
+  },
+  {
+    title: "There's some uncertainty",
+    sub: "I'm not sure what's next, I'm considering a career change, or I could do several roles and can't pick",
+    msg: "There's some uncertainty about my next move. Help me find the direction first.",
+  },
 ];
 
 export default function PositioningClient({ initial }: { initial: Initial }) {
@@ -276,10 +282,11 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
               <div className="welcome">
                 <h2>Make the case for why they hire you.</h2>
                 <p>We&apos;ll pin down what your target employers need solved, find the proof in your career, and build a positioning profile you&apos;ll review with {STRATEGIST}. Once {STRATEGIST} approves it, this tool rebuilds your LinkedIn on that foundation.</p>
-                <p>Have your résumé and accomplishments document ready to upload. If you completed the Clean Out the Garage and Peak &amp; Crap exercises, bring those too. Two or three job descriptions you&apos;d apply for will sharpen everything.</p>
+                <p>Have your résumé and accomplishments document ready to upload. If you completed the Clean Out the Garage and Peak &amp; Crap exercises, bring those too.</p>
+                <h3 className="fork-q">Do you know what you want next, or is there some uncertainty?</h3>
                 <div className="starters">
                   {STARTERS.map((s) => (
-                    <button key={s.title} type="button" onClick={() => (s.msg === "__attach" ? fileRef.current?.click() : send(s.msg))}>
+                    <button key={s.title} type="button" className="fork" onClick={() => send(s.msg)}>
                       <b>{s.title}</b>
                       <span>{s.sub}</span>
                     </button>
