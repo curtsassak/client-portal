@@ -99,7 +99,9 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
   const [notice, setNotice] = useState("");
   const [input, setInput] = useState("");
   const [attach, setAttach] = useState<{ name: string; text: string } | null>(null);
-  const [ptab, setPtab] = useState<Tab>(initial.direction && !initial.profile ? "direction" : "profile");
+  const [ptab, setPtab] = useState<Tab>(
+    !initial.profile && (initial.direction || initial.turns.some((t) => t.role === "user" && (t.display ?? t.content).startsWith("There's some uncertainty"))) ? "direction" : "profile"
+  );
   const [view, setView] = useState<"chat" | "profile">("chat");
   const [confirmReset, setConfirmReset] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -125,6 +127,10 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
   }, [turns.length, live, error]);
 
   const phase2 = status === "approved";
+  const UNCERTAIN = "There's some uncertainty";
+  const startedUncertain = (list: Turn[]) => list.some((t) => t.role === "user" && (t.display ?? t.content).startsWith(UNCERTAIN));
+  const usesDirection = !!direction || startedUncertain(turns);
+  const inDirection = usesDirection && !profile && !phase2;
   const profileTitle = phase2 ? "Master Positioning Profile" : "Draft Positioning Profile";
 
   async function run(body: Record<string, unknown>, optimistic?: Turn) {
@@ -265,7 +271,8 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
     <div className="workspace" data-view={view}>
       <div className="subbar">
         <ol className="track" aria-label="Progress">
-          <li data-s={phase2 ? "done" : "active"}><span className="n">1</span>Positioning discovery</li>
+          {usesDirection && <li data-s={inDirection ? "active" : "done"}><span className="n">0</span>Find direction</li>}
+          <li data-s={phase2 ? "done" : inDirection ? "pending" : "active"}><span className="n">1</span>Positioning discovery</li>
           <li data-s={phase2 ? "done" : status === "submitted" ? "active" : "pending"}><span className="n">2</span>Strategist review</li>
           <li data-s={phase2 ? "active" : "locked"}><span className="n">3</span>LinkedIn</li>
         </ol>
@@ -286,7 +293,7 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
                 <h3 className="fork-q">Do you know what you want next, or is there some uncertainty?</h3>
                 <div className="starters">
                   {STARTERS.map((s) => (
-                    <button key={s.title} type="button" className="fork" onClick={() => send(s.msg)}>
+                    <button key={s.title} type="button" className="fork" onClick={() => { if (s.msg.startsWith("There's some uncertainty")) setPtab("direction"); send(s.msg); }}>
                       <b>{s.title}</b>
                       <span>{s.sub}</span>
                     </button>
@@ -389,13 +396,18 @@ export default function PositioningClient({ initial }: { initial: Initial }) {
 
         <aside className="profile" aria-label="Your positioning">
           <div className="ptabs" role="tablist">
-            {direction && <button role="tab" aria-selected={ptab === "direction"} onClick={() => setPtab("direction")}>Direction</button>}
+            {usesDirection && <button role="tab" aria-selected={ptab === "direction"} onClick={() => setPtab("direction")}>Direction</button>}
             <button role="tab" aria-selected={ptab === "profile"} onClick={() => setPtab("profile")}>Positioning profile</button>
             <button role="tab" aria-selected={ptab === "linkedin"} onClick={() => setPtab("linkedin")}>LinkedIn</button>
           </div>
           <div className="pbody">
             {doc ? (
               <div className="doc"><Md text={doc} /></div>
+            ) : ptab === "direction" ? (
+              <div className="empty">
+                <b>Your Direction Plan lands here.</b>
+                <span>It builds as you work through finding your direction: your Next Move Criteria, skills, a shortlist of directions, and a plan to test them.</span>
+              </div>
             ) : ptab === "profile" ? (
               <div className="empty">
                 <b>Your Draft Positioning Profile lands here.</b>
