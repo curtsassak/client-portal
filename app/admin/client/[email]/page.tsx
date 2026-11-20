@@ -4,7 +4,8 @@ import remarkGfm from "remark-gfm";
 import TopBar from "@/components/TopBar";
 import { requireAdmin } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { setStatus } from "../../actions";
+import { setStatus, updateMeasures, setGoalsConfirmed } from "../../actions";
+import { getIntakeByEmail, INTAKE_QUESTIONS, STATUS_LABEL } from "@/lib/intake";
 import type { Turn } from "@/lib/positioning";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,8 @@ export default async function ClientDetail({ params }: { params: { email: string
     db.from("positioning").select("*").eq("email", email).maybeSingle(),
   ]);
   const name = client?.name || email;
+  const intake = await getIntakeByEmail(email).catch(() => null);
+  const fmt = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/Chicago" });
   const turns: Turn[] = (rec?.turns as Turn[]) || [];
 
   return (
@@ -29,6 +32,43 @@ export default async function ClientDetail({ params }: { params: { email: string
           <h2 className="h-xl">{name}</h2>
           <p className="muted">{email}</p>
         </div>
+
+        {intake?.submitted_at ? (
+          <section className="panel goals-admin">
+            <div className="goals-head">
+              <h3>Goals and success measures</h3>
+              <span className={`pill ${intake.confirmed_at ? "ok" : "gold"}`}>
+                {intake.confirmed_at ? `Confirmed ${fmt(intake.confirmed_at)}` : `Submitted ${fmt(intake.submitted_at)}, not yet confirmed`}
+              </span>
+            </div>
+            {INTAKE_QUESTIONS.map((q) => (
+              <div key={q.id} className="qa">
+                <div className="muted small">{q.label}</div>
+                <p>{intake.answers[q.id]}</p>
+              </div>
+            ))}
+            <form action={updateMeasures} className="measure-form">
+              <input type="hidden" name="email" value={email} />
+              {intake.measures.map((m, i) => (
+                <div key={i} className="measure-row">
+                  <div className="strong">{i + 1}. {m.text}</div>
+                  <select name={`status${i}`} defaultValue={m.status} className="field" aria-label={`Status for measure ${i + 1}`}>
+                    {Object.entries(STATUS_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                  <input name={`note${i}`} defaultValue={m.note || ""} className="field" placeholder="Note (visible to client)" aria-label={`Note for measure ${i + 1}`} />
+                </div>
+              ))}
+              <div className="review-acts"><button className="btn primary" type="submit">Save progress</button></div>
+            </form>
+            <form action={setGoalsConfirmed} className="review-acts">
+              <input type="hidden" name="email" value={email} />
+              {!intake.confirmed_at && <button className="btn" name="to" value="confirm" type="submit">Confirm goals (agreed with client)</button>}
+              <button className="btn link" name="to" value="reopen" type="submit">Reopen for client to edit</button>
+            </form>
+          </section>
+        ) : (
+          <section className="panel"><p className="muted">{name} hasn&apos;t submitted onboarding goals yet. They&apos;ll be asked to the next time they sign in.</p></section>
+        )}
 
         {!rec ? (
           <section className="panel"><p className="muted">{name} hasn&apos;t opened the Positioning tool yet.</p></section>

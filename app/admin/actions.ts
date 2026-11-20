@@ -86,3 +86,32 @@ export async function createSignInLink(email: string): Promise<LinkState> {
   if (error || !hash) return { ok: false, message: `Couldn't create a link. (${error?.message || "no token"})` };
   return { ok: true, link: `${siteOrigin()}/auth/confirm?token_hash=${hash}&type=magiclink` };
 }
+
+// ---- Onboarding goals ----
+export async function updateMeasures(form: FormData) {
+  await requireAdmin();
+  const email = String(form.get("email") || "").toLowerCase();
+  const db = supabaseAdmin();
+  const { data } = await db.from("intake").select("measures").eq("email", email).maybeSingle();
+  if (!data) return;
+  const measures = (data.measures as { text: string; status: string; note?: string }[]).map((m, i) => ({
+    text: m.text,
+    status: String(form.get(`status${i}`) || m.status),
+    note: String(form.get(`note${i}`) ?? m.note ?? "").slice(0, 1000),
+  }));
+  await db.from("intake").update({ measures, updated_at: new Date().toISOString() }).eq("email", email);
+  revalidatePath(`/admin/client/${encodeURIComponent(email)}`);
+  revalidatePath("/admin");
+}
+
+export async function setGoalsConfirmed(form: FormData) {
+  await requireAdmin();
+  const email = String(form.get("email") || "").toLowerCase();
+  const confirm = String(form.get("to")) === "confirm";
+  const patch = confirm
+    ? { confirmed_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+    : { confirmed_at: null, submitted_at: null, updated_at: new Date().toISOString() }; // reopen: client edits and resubmits
+  await supabaseAdmin().from("intake").update(patch).eq("email", email);
+  revalidatePath(`/admin/client/${encodeURIComponent(email)}`);
+  revalidatePath("/admin");
+}

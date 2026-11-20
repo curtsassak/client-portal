@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getIntakeByUser, STATUS_LABEL } from "@/lib/intake";
 import TopBar from "@/components/TopBar";
 import { requireUser, isAdminEmail } from "@/lib/auth";
 import { getPositioning } from "@/lib/positioning";
@@ -7,6 +9,10 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const user = await requireUser();
+  const admin = isAdminEmail(user.email);
+  const intake = await getIntakeByUser(user.id);
+  if (!admin && intake !== "unavailable" && !intake?.submitted_at) redirect("/welcome");
+  const goals = intake && intake !== "unavailable" && intake.submitted_at ? intake : null;
   const rec = await getPositioning(user.id, user.email!);
   const approved = rec.status === "approved";
   const posState =
@@ -18,6 +24,24 @@ export default async function Home() {
       <main className="home">
         <h2 className="h-xl">Your tools</h2>
         <p className="muted lead">Positioning comes first. Once Curt approves it, your Résumé and Content tools build on it.</p>
+        {goals && (
+          <section className="panel goals">
+            <div className="goals-head">
+              <h3>Your goals</h3>
+              <span className={`pill ${goals.confirmed_at ? "ok" : "gold"}`}>{goals.confirmed_at ? "Agreed with Curt" : "Waiting for Curt to review"}</span>
+            </div>
+            <p className="muted small">{goals.answers.goals}</p>
+            <ol className="measures">
+              {goals.measures.map((m, i) => (
+                <li key={i}>
+                  <span>{m.text}</span>
+                  <span className={`pill ${m.status === "met" ? "ok" : m.status === "in_progress" ? "gold" : m.status === "not_met" ? "alert" : ""}`}>{STATUS_LABEL[m.status]}</span>
+                  {m.note && <span className="muted small note">{m.note}</span>}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
         <div className="tools">
           <Link href="/positioning" className="tool live">
             <span className="tool-step">Step 1</span>

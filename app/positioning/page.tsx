@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import TopBar from "@/components/TopBar";
+import { getIntakeByUser } from "@/lib/intake";
 import { requireUser, isAdminEmail } from "@/lib/auth";
 import { getPositioning } from "@/lib/positioning";
 import PositioningClient from "./PositioningClient";
@@ -7,6 +9,8 @@ export const dynamic = "force-dynamic";
 
 export default async function PositioningPage() {
   const user = await requireUser();
+  const intake = await getIntakeByUser(user.id);
+  if (!isAdminEmail(user.email) && intake !== "unavailable" && !intake?.submitted_at) redirect("/welcome");
   const rec = await getPositioning(user.id, user.email!);
   return (
     <div className="page app">

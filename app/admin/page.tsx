@@ -23,11 +23,15 @@ export default async function Admin() {
     db.from("clients").select("email,name,created_at").order("created_at", { ascending: false }),
     db.from("positioning").select("email,status,profile,updated_at"),
   ]);
+  const { data: intakes } = await db.from("intake").select("email,submitted_at,confirmed_at");
+  const intakeBy = new Map((intakes || []).map((r) => [String(r.email).toLowerCase(), r]));
   const byEmail = new Map((recs || []).map((r) => [String(r.email).toLowerCase(), r]));
   const rows = (clients || []).map((c) => {
     const r = byEmail.get(c.email);
     const key = !r ? "none" : r.status === "draft" ? (r.profile ? "ready" : "draft") : r.status;
-    return { ...c, key, updated: r?.updated_at as string | undefined };
+    const it = intakeBy.get(c.email);
+    const goals = !it?.submitted_at ? "none" : it.confirmed_at ? "confirmed" : "submitted";
+    return { ...c, key, goals, updated: r?.updated_at as string | undefined };
   });
   const order = ["submitted", "ready", "draft", "none", "approved"];
   rows.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
@@ -54,7 +58,7 @@ export default async function Admin() {
           ) : (
             <div className="table-wrap">
               <table className="clients">
-                <thead><tr><th>Client</th><th>Positioning</th><th>Last activity</th><th></th></tr></thead>
+                <thead><tr><th>Client</th><th>Goals</th><th>Positioning</th><th>Last activity</th><th></th></tr></thead>
                 <tbody>
                   {rows.map((r) => (
                     <tr key={r.email}>
@@ -62,6 +66,7 @@ export default async function Admin() {
                         <Link href={`/admin/client/${encodeURIComponent(r.email)}`} className="strong">{r.name || r.email}</Link>
                         {r.name && <div className="muted small">{r.email}</div>}
                       </td>
+                      <td><span className={`pill ${r.goals === "confirmed" ? "ok" : r.goals === "submitted" ? "alert" : ""}`}>{r.goals === "confirmed" ? "Confirmed" : r.goals === "submitted" ? "Review goals" : "Not submitted"}</span></td>
                       <td><span className={`pill ${LABEL[r.key].cls}`}>{LABEL[r.key].text}</span></td>
                       <td className="muted small">{r.updated ? new Date(r.updated).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "America/Chicago" }) : "—"}</td>
                       <td>

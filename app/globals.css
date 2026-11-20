@@ -185,3 +185,16 @@ aside.profile { min-height: 0; min-width: 0; display: flex; flex-direction: colu
 .fork-q { font-family: var(--display); font-size: 18px; margin: 6px 0 0; text-wrap: balance; }
 .starters button.fork { border-color: var(--gold); padding: 16px; }
 .starters button.fork b { font-size: 17px; }
+.home.narrow { max-width: 720px; }
+.intake { display: flex; flex-direction: column; gap: 18px; }
+.intake .fieldset { display: flex; flex-direction: column; gap: 6px; }
+.intake .q { font-family: var(--display); font-size: 16px; font-weight: 600; }
+.intake textarea.field { resize: vertical; }
+.goals-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.measures { margin: 10px 0 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+.measures li span:first-child { margin-right: 8px; }
+.measures .note { display: block; margin-top: 2px; }
+.qa { margin: 10px 0; } .qa p { margin: 2px 0 0; white-space: pre-wrap; }
+.measure-form { display: flex; flex-direction: column; gap: 12px; margin: 14px 0; }
+.measure-row { display: grid; grid-template-columns: minmax(0,1fr) 160px minmax(0,1fr); gap: 8px; align-items: center; }
+@media (max-width: 899px) { .measure-row { grid-template-columns: minmax(0,1fr); } }
