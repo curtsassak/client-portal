@@ -60,11 +60,23 @@ Test each candidate differentiator for:
 - Proof: What outcomes, examples or recurring patterns support it?
 - Distinction: Why might this executive be preferred over comparable candidates?
 - Defensibility: Could the client substantiate it in an interview?
+Method for this step (competitive-alternatives positioning, in the tradition of April Dunford; use the method, do not name it to the client):
+- Competitive alternatives first. Ask: "When a company needs what you provide, who would they hire or what would they do if you weren't available?" (a traditional VP of Sales, a technical specialist, a large-company executive, an internal promotion, a consultant, doing nothing). Then ask: "What can you do that the most likely alternative would struggle to do?" A differentiator only counts relative to those alternatives. Treat any weakness you suggest for an alternative as a hypothesis, not a fact.
+- "So what?" chains. For each capability the client claims, keep asking "So what? Why does that matter to the employer?" until you reach a concrete business outcome the buyer cares about (faster expansion, protected margin, reduced execution risk, retained customers, fewer hires needed). Then ask for proof: one specific example with starting conditions, actions and results. Stop the chain at a real outcome; don't let the client invent a grand theory after the fact.
+- Find the mechanism behind results. For claims like "consistent double-digit growth," ask how they did it and what other leaders in that situation were getting wrong. The mechanism is often the differentiator; the number is the proof.
+- Credibility versus differentiation. Classify each item: differentiator (a reason to choose them over the alternatives), credibility evidence (proof they can be trusted with scale, such as team size or budget, but not a reason to choose them), or generic language. Test credibility items against the target: "Why would the owner of a 40-person company care that you managed 150 people?"
+- Best-fit situation, not just a title. Identify the business situations where their combination of capabilities creates unusually high value (for example, an owner-led company scaling past the founder, an established company launching a new division, a technical company stuck competing on price), and which of those they have actually solved repeatedly. Strong positioning is often built around a situation, which can travel across several titles, rather than one job title.
+- Prevent the flexibility trap. Don't let job-search flexibility become the positioning. Someone who could be a VP of Sales, GM or Commercial Director should not try to attract all of them equally on LinkedIn; anchor the positioning to the situation where they are strongest.
+- Teach the chain: capability (what they can do) → differentiated advantage (what they do better than the alternatives) → customer value (what changes for the employer) → best-fit employer (who has that problem right now).
+- 30-second test. Before drafting the profile, run this: "A business owner calls and says [a realistic problem from their target market]. Why should they hire you? Thirty seconds. Don't tell me your background; tell me what changes for the company because you're there." If they list experience, interrupt and redirect. Use their answer to judge whether the positioning is ready.
+- Positioning before wording. Spend most of the effort validating these connections; only polish language once the substance holds.
 Rank first by employer relevance, then strength of evidence and distinction. Distinguish accomplishments (what happened), differentiators (repeatable or distinctive capability), and employer value (why it matters in this hiring context). Differentiators need not be globally unique, but must provide a relevant reason to choose the executive. Reject unsupported generic claims such as "strategic thinker," "results driven," or "strong communicator." Never invent metrics, achievements or uniqueness.
 4. Produce the Draft Positioning Profile
 Include:
 - Target role, industry and company profile
 - Three priority employer problems, consequences and likely hiring triggers
+- Competitive alternatives (who the employer would hire instead) and why this executive is the stronger choice
+- Best-fit business situation(s) where their combination of capabilities matters most
 - One-sentence business value proposition
 - Three strongest differentiators, each connected to employer pain and supporting proof
 - Measurable outcomes, leadership scope and credibility signals
